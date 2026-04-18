@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: 'Menlo', 'Monaco', ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --color-ide-bg: #ffffff;
+  --color-ide-side: #f7f7f7;
+  --color-ide-text: #1a1a1a;
+  --color-ide-border: #e5e5e5;
+  --color-ide-hover: #efefef;
+  --color-ide-select: #e8e8e8;
+  --color-ide-accent: #0066cc;
+}
+
+.editor-tab-active {
+  border-top-color: var(--color-ide-accent);
+}
+
+.markdown-body {
+  font-family: var(--font-sans);
+  color: var(--color-ide-text);
+  line-height: 1.6;
+}
+
+.markdown-body h1 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-top: 0;
+}
+
+.markdown-body h2 {
+  font-size: 20px;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #444444;
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+.markdown-body h3 {
+  font-size: 16px;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.markdown-body p {
+  line-height: 1.6;
+  margin-bottom: 16px;
+  color: #333333;
+  margin-top: 0;
+}
+
+.markdown-body a {
+  color: var(--color-ide-accent);
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body ul, .markdown-body ol {
+  margin-left: 20px;
+  margin-bottom: 16px;
+  padding-left: 0;
+  color: #333333;
+}
+
+.markdown-body li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.markdown-body code {
+  font-family: var(--font-mono);
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 85%;
+  color: #1a1a1a;
+}
+
+.markdown-body pre {
+  background-color: #f7f7f7;
+  padding: 16px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 85%;
+  line-height: 1.45;
+  border-radius: 3px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e5e5;
+}
+
+.markdown-body pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #333333;
+}
+
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: #666666;
+  border-left: 0.25em solid #e5e5e5;
+  margin: 0 0 16px 0;
+}

@@ -1,0 +1,7 @@
+# Car ECU Tuning
+
+for as long as i've owned a car, i always wondered what went into the parameters of an engine computer. things like air-to-fuel ratios, torque-mappings, ignition timings, were all concepts i wanted to tinker with. i knew about off-the-shelf engine tunes; you could literally buy an OBD-II dongle and tuning file from a reputable company and upload it to your car like a software update, and boom: +100 horsepower with no hardware modifications. but these tunes can cost $500-1000, and i figured i could save this money while learning how to tune myself.
+
+my car is a 2015 volkswagen GTI. i learned that, with its turbocharged engine, tuning can bring significant gains. a bit of research revealed that the OEM tune was overly conservative, meaning the engine could handle higher torque without issue, with the caveat of more frequent servicing. given the car's healthy track record - no mechanical issues in the past 10 years - i was prepared to take the risk of tuning.
+
+an open-source platform known as SimosTools exists to help people like myself get into car tuning. it turns out, you can build your own car adapter - known as an OBD-II dongle - using an ESP32 microcontroller and a ISOTP CAN transceiver with [Bluetooth to ISOTP](https://github.com/Switchleg1/esp32-isotp-ble-bridge) firmware installed. this allows me to flash files from my mobile phone to the esp32, which write the file to the car via the CAN protocol. i built one with 20 dollars' worth of amazon parts.

@@ -1,0 +1,6 @@
+{
+  "name": "Minimalist IDE Portfolio",
+  "description": "A minimalist, modern portfolio website in the form of a file browser like VS Code, loading Markdown files for different sections.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
