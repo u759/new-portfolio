@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+// @ts-ignore
 import './globals.css'; // Global styles
 
 const inter = Inter({
@@ -13,7 +14,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Portfolio File Browser',
+  title: 'Ayden Nguyen',
   description: 'A minimalist, modern portfolio website in the form of a file browser',
 };
 
