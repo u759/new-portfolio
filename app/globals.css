@@ -67,6 +67,31 @@
   text-decoration: underline;
 }
 
+.markdown-body img {
+  max-width: 100%;
+  max-height: 360px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.markdown-body table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.markdown-body td {
+  vertical-align: top;
+  padding: 0.5rem;
+}
+
+.markdown-body td img {
+  width: 100%;
+  height: auto;
+}
+
 .markdown-body ul, .markdown-body ol {
   margin-left: 20px;
   margin-bottom: 16px;
