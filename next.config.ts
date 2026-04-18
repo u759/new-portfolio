@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  output: 'standalone',
+  outputFileTracingIncludes: {
+    '/*': ['./content/**/*'],
+  },
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
     // HMR is disabled via DISABLE_HMR env var.

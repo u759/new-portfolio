@@ -15,8 +15,36 @@ export interface FileNode {
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
 
+function resolveContentDir(): string | null {
+  const candidates = new Set<string>([
+    CONTENT_DIR,
+    path.join(process.cwd(), '.next', 'standalone', 'content'),
+    path.join(process.cwd(), '.next', 'server', 'content'),
+  ]);
+
+  let currentDir = process.cwd();
+  for (let i = 0; i < 6; i += 1) {
+    candidates.add(path.join(currentDir, 'content'));
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;
+    }
+    currentDir = parentDir;
+  }
+
+  for (const dir of candidates) {
+    if (fs.existsSync(dir)) {
+      return dir;
+    }
+  }
+
+  return null;
+}
+
 export async function getFileSystem(): Promise<FileNode[]> {
-  if (!fs.existsSync(CONTENT_DIR)) {
+  const contentDir = resolveContentDir();
+
+  if (!contentDir) {
     return [];
   }
 
@@ -56,14 +84,21 @@ export async function getFileSystem(): Promise<FileNode[]> {
     return nodes;
   }
 
-  return readDirectory(CONTENT_DIR, '');
+  return readDirectory(contentDir, '');
 }
 
 export async function getFileContent(filePath: string): Promise<string> {
+  const contentDir = resolveContentDir();
+
+  if (!contentDir) {
+    return '';
+  }
+
   const safePath = path.normalize(filePath).replace(/^(\.\.(\/|\\|$))+/, '');
-  const fullPath = path.join(CONTENT_DIR, safePath);
+  const fullPath = path.join(contentDir, safePath);
+  const relativePath = path.relative(contentDir, fullPath);
   
-  if (!fullPath.startsWith(CONTENT_DIR)) {
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
     throw new Error('Invalid path');
   }
   
