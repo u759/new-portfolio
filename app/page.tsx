@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
@@ -80,6 +81,25 @@ function FileExplorer({
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function MarkdownImage({ src, alt }: { src?: string; alt?: string }) {
+  if (!src) return null;
+
+  const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
+
+  return (
+    <div className="markdown-image-wrapper">
+      <Image
+        src={normalizedSrc}
+        alt={alt ?? ''}
+        width={1200}
+        height={800}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+        style={{ width: '100%', height: 'auto' }}
+      />
     </div>
   );
 }
@@ -169,7 +189,17 @@ export default function Home() {
             {/* Directly conditionally render content without animations */}
             {selectedFile && selectedFile.content ? (
               <div className="markdown-body">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    img: ({ src, alt }) => (
+                      <MarkdownImage
+                        src={typeof src === 'string' ? src : ''}
+                        alt={typeof alt === 'string' ? alt : ''}
+                      />
+                    ),
+                  }}
+                >
                   {selectedFile.content}
                 </ReactMarkdown>
               </div>
