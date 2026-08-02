@@ -17,6 +17,14 @@
   border-top-color: var(--color-ide-accent);
 }
 
+.image-lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.86);
+}
+
+.image-lightbox:not([open]) {
+  display: none;
+}
+
 .markdown-body {
   font-family: var(--font-sans);
   color: var(--color-ide-text);

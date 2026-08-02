@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, ChevronDown, Folder as FolderIcon, FileText, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Folder as FolderIcon, FileText, LoaderCircle, Menu, X } from 'lucide-react';
 import { getFileSystem, getFileContent, FileNode } from '@/app/actions';
 
 function FileExplorer({
@@ -85,22 +85,46 @@ function FileExplorer({
   );
 }
 
-function MarkdownImage({ src, alt }: { src?: string; alt?: string }) {
+type GalleryImage = {
+  src: string;
+  alt: string;
+};
+
+function MarkdownImage({
+  src,
+  alt,
+  onOpen,
+}: {
+  src?: string;
+  alt?: string;
+  onOpen: (image: GalleryImage) => void;
+}) {
   if (!src) return null;
 
   const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
+  const image = (
+    <Image
+      src={normalizedSrc}
+      alt={alt ?? ''}
+      width={1200}
+      height={800}
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+      style={{ width: '100%', height: 'auto' }}
+    />
+  );
 
   return (
-    <div className="markdown-image-wrapper">
-      <Image
-        src={normalizedSrc}
-        alt={alt ?? ''}
-        width={1200}
-        height={800}
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-        style={{ width: '100%', height: 'auto' }}
-      />
-    </div>
+    <button
+      type="button"
+      className="group block w-full cursor-zoom-in appearance-none border-0 bg-transparent p-0"
+      aria-label={`Expand ${alt || 'image'}`}
+      data-markdown-image="true"
+      data-image-src={normalizedSrc}
+      data-image-alt={alt ?? ''}
+      onClick={() => onOpen({ src: normalizedSrc, alt: alt ?? '' })}
+    >
+      {image}
+    </button>
   );
 }
 
@@ -108,21 +132,125 @@ export default function Home() {
   const [fileSystem, setFileSystem] = useState<FileNode[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isInitialLoadPending, setIsInitialLoadPending] = useState(true);
+  const markdownContentRef = useRef<HTMLDivElement>(null);
+  const imageDialogRef = useRef<HTMLDialogElement>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [activeGalleryImageIndex, setActiveGalleryImageIndex] = useState<number | null>(null);
+  const [isGalleryImageLoading, setIsGalleryImageLoading] = useState(false);
 
   useEffect(() => {
     const fetchRoot = async () => {
-      const nodes = await getFileSystem();
-      setFileSystem(nodes);
-      
-      // Select about.md initially if it exists
-      const initialFile = nodes.find(n => n.name === 'about.md' && n.type === 'file');
-      if (initialFile) {
-        const content = await getFileContent(initialFile.path);
-        setSelectedFile({ ...initialFile, content });
+      try {
+        const nodes = await getFileSystem();
+        setFileSystem(nodes);
+
+        const initialFile = nodes.find(n => n.name === 'about.md' && n.type === 'file');
+        if (initialFile) {
+          const content = await getFileContent(initialFile.path);
+          setSelectedFile({ ...initialFile, content });
+        }
+      } finally {
+        setIsInitialLoadPending(false);
       }
     };
     fetchRoot();
   }, []);
+
+  useEffect(() => {
+    const dialog = imageDialogRef.current;
+
+    if (!dialog) {
+      throw new Error('[Exception in Home.imageDialogEffect]: Missing image dialog element. Expected a mounted HTMLDialogElement, received: null');
+    }
+
+    if (activeGalleryImageIndex === null) {
+      if (dialog.open) {
+        dialog.close();
+      }
+      return;
+    }
+
+    if (!galleryImages[activeGalleryImageIndex]) {
+      throw new Error(`[Exception in Home.imageDialogEffect]: Invalid parameter 'activeGalleryImageIndex'. Expected an index in galleryImages, received: ${activeGalleryImageIndex}`);
+    }
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+  }, [activeGalleryImageIndex, galleryImages]);
+
+  useEffect(() => {
+    if (activeGalleryImageIndex === null) {
+      return;
+    }
+
+    const handleGalleryKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        setIsGalleryImageLoading(true);
+        setActiveGalleryImageIndex((currentIndex) => {
+          if (currentIndex === null || galleryImages.length === 0) {
+            throw new Error(`[Exception in Home.handleGalleryKeyDown]: Invalid gallery navigation state. Expected an open gallery with images, received index: ${currentIndex}, image count: ${galleryImages.length}`);
+          }
+          return (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+        });
+      }
+
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        setIsGalleryImageLoading(true);
+        setActiveGalleryImageIndex((currentIndex) => {
+          if (currentIndex === null || galleryImages.length === 0) {
+            throw new Error(`[Exception in Home.handleGalleryKeyDown]: Invalid gallery navigation state. Expected an open gallery with images, received index: ${currentIndex}, image count: ${galleryImages.length}`);
+          }
+          return (currentIndex + 1) % galleryImages.length;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleGalleryKeyDown);
+    return () => window.removeEventListener('keydown', handleGalleryKeyDown);
+  }, [activeGalleryImageIndex, galleryImages.length]);
+
+  const closeGallery = () => {
+    setActiveGalleryImageIndex(null);
+    setGalleryImages([]);
+    setIsGalleryImageLoading(false);
+    imageDialogRef.current?.close();
+  };
+
+  const openGalleryImage = (image: GalleryImage) => {
+    const imageButtons = markdownContentRef.current?.querySelectorAll<HTMLButtonElement>('[data-markdown-image="true"]');
+
+    if (!imageButtons || imageButtons.length === 0) {
+      throw new Error(`[Exception in Home.openGalleryImage]: Missing Markdown image buttons. Expected at least one image button for '${image.src}', received: ${imageButtons?.length ?? 0}`);
+    }
+
+    const images = Array.from(imageButtons).map((button) => {
+      const src = button.dataset.imageSrc;
+      const alt = button.dataset.imageAlt;
+
+      if (!src || alt === undefined) {
+        throw new Error(`[Exception in Home.openGalleryImage]: Invalid Markdown image metadata. Expected data-image-src and data-image-alt on every image button, received src: ${src ?? 'missing'}, alt: ${alt ?? 'missing'}`);
+      }
+
+      return { src, alt };
+    });
+
+    const imageIndex = images.findIndex((candidate) => candidate.src === image.src);
+    if (imageIndex < 0) {
+      throw new Error(`[Exception in Home.openGalleryImage]: Image '${image.src}' was not found in the rendered Markdown gallery. Expected the clicked image to be present in the current document.`);
+    }
+
+    setGalleryImages(images);
+    setIsGalleryImageLoading(true);
+    setActiveGalleryImageIndex(imageIndex);
+  };
+
+  const activeGalleryImage = activeGalleryImageIndex === null
+    ? null
+    : galleryImages[activeGalleryImageIndex];
 
   return (
     <div className="flex h-screen bg-[#ffffff] font-sans overflow-hidden">
@@ -147,6 +275,7 @@ export default function Home() {
               key={index}
               node={node}
               onFileSelect={(file, content) => {
+                closeGallery();
                 setSelectedFile({ ...file, content });
                 setIsSidebarOpen(false); // Close sidebar on mobile after selection
               }}
@@ -187,8 +316,17 @@ export default function Home() {
         <div className="flex-1 overflow-auto bg-[#ffffff] px-8 py-10 md:px-16" id="editor-area">
           <div className="max-w-4xl">
             {/* Directly conditionally render content without animations */}
-            {selectedFile && selectedFile.content ? (
-              <div className="markdown-body">
+            {isInitialLoadPending ? (
+              <div className="h-full flex items-center justify-center text-[#888888] mt-32" role="status" aria-live="polite">
+                <div className="text-center font-mono text-sm">
+                  <div className="mb-4 flex justify-center">
+                    <LoaderCircle size={36} className="animate-spin text-[#0066cc]" aria-hidden="true" />
+                  </div>
+                  <div>Opening portfolio…</div>
+                </div>
+              </div>
+            ) : selectedFile && selectedFile.content ? (
+              <div className="markdown-body" ref={markdownContentRef}>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
@@ -196,6 +334,7 @@ export default function Home() {
                       <MarkdownImage
                         src={typeof src === 'string' ? src : ''}
                         alt={typeof alt === 'string' ? alt : ''}
+                        onOpen={openGalleryImage}
                       />
                     ),
                   }}
@@ -222,6 +361,82 @@ export default function Home() {
           <div>Line 1, Col 1 | Spaces: 2</div>
         </div>
       </div>
+
+      <dialog
+        ref={imageDialogRef}
+        className="image-lightbox fixed inset-0 m-0 flex h-dvh w-dvw max-h-none max-w-none items-center justify-center bg-transparent p-4"
+        aria-label="Expanded Markdown image"
+        onClose={() => {
+          setActiveGalleryImageIndex(null);
+          setGalleryImages([]);
+          setIsGalleryImageLoading(false);
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            closeGallery();
+          }
+        }}
+      >
+        {activeGalleryImage && activeGalleryImageIndex !== null && (
+          <div className="relative flex h-full w-full max-w-6xl items-center justify-center">
+            <Image
+              fill
+              src={activeGalleryImage.src}
+              alt={activeGalleryImage.alt}
+              sizes="(max-width: 1152px) 100vw, 1152px"
+              className={`object-contain transition-opacity duration-200 ${isGalleryImageLoading ? 'opacity-0' : 'opacity-100'}`}
+              onLoad={() => setIsGalleryImageLoading(false)}
+              priority
+            />
+
+            {isGalleryImageLoading && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center" role="status" aria-label="Loading image">
+                <LoaderCircle size={28} className="animate-spin text-white/80" aria-hidden="true" />
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="absolute right-2 top-2 rounded-full bg-black/60 p-2 text-white transition-colors hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white"
+              aria-label="Close expanded image"
+              autoFocus
+              onClick={closeGallery}
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+
+            {galleryImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white transition-colors hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-label="Previous image"
+                  onClick={() => {
+                    setIsGalleryImageLoading(true);
+                    setActiveGalleryImageIndex((activeGalleryImageIndex - 1 + galleryImages.length) % galleryImages.length);
+                  }}
+                >
+                  <ChevronLeft size={24} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white transition-colors hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-label="Next image"
+                  onClick={() => {
+                    setIsGalleryImageLoading(true);
+                    setActiveGalleryImageIndex((activeGalleryImageIndex + 1) % galleryImages.length);
+                  }}
+                >
+                  <ChevronRight size={24} aria-hidden="true" />
+                </button>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-mono text-white">
+                  {activeGalleryImageIndex + 1} / {galleryImages.length}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </dialog>
     </div>
   );
 }

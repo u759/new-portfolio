@@ -19,4 +19,6 @@ I carefully followed an online guide to conservatively tune the car. It was an i
 
 I exported the .bin file and flashed it to the ECU, and it worked. The car drove, but I dont think it was any faster than it was previously. I would have to launch the car at full throttle and view the performance logs before and after to make a claim - something I shouldn't do on public roads. I still have a lot to learn regarding tuning, interpreting sensor logs to improve performance, and balancing longevity and fuel efficiency. My next goals for this project is to test the car under controlled conditions, log metrics such as acceleration, engine knock, engine load, torque, airflow, etc, and better understand how engines operate to make informed decisions on the next tune.
 
+Update (July 2026): I did a 2nd gear pull and observed ~26 PSI of boost. It definitely was faster than before, but 26 psi is A LOT for the stock IS20 turbo. I flashed back to stock to save the engine for when I have more time.
+
 To be continued...
