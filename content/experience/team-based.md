@@ -2,9 +2,12 @@
 **June 2025 – Present**  
 **Firmware Developer**
 
-- Developing flight control firmware for vertical takeoff/landing (VTOL) electric aircraft.  
-- Implementing C code on an STM32H7 and custom power electronics for autonomous flight, takeoff/landing, and waypoint navigation with PID, GPS, IMU, Airspeed, and Barometer sensor fusion.  
-- Optimizing telemetry for ground-based monitoring.  
+- Developing flight control firmware for vertical takeoff/landing (VTOL) electric aircraft.
+- Implementing C++ code on an STM32H7 and custom power electronics for autonomous flight, takeoff/landing, and waypoint navigation with PID, GPS, IMU, Airspeed, and Barometer sensor fusion.
+- Architecting 4-layer cascaded PID controller for stable posistion hold in VTOL and waypoint navigation in forward flight
+- Optimized shared memory via thread-safe RTOS mailbox queue, for safe data sharing between FreeRTOS tasks
+- Refactored UART logging library from OS-blocking HAL writes to asynchronous DMA/ring-buffer logging, unblocking critical flight tasks and improving logging performance by 90%
+- Optimizing telemetry for ground-based monitoring.
 
 **Sept 2023 – June 2025**  
 **Power & Controls Lead**

@@ -1,3 +1,15 @@
+# MAZDIS  
+**May 2026 – August 2026**  
+**Software Engineer Intern**
+
+- Rewrote backend NFC logic, and mobile app serving 500+ users for automated bicycle parking stations
+- Produced complete, production-ready code with FastAPI, React Native, Material UI
+- Integrated IoT systems using MQTT and ESP32+RTC design, achieving ~100nA standby current
+- Thought really hard about security, designed secure NFC bicycle lock system with HMAC authentication and offline capability
+- Hired developers and interns and wrote technical and onboarding documentation
+
+---
+
 # BC Liquor Distribution Branch (BCLDB)  
 **May 2025 – December 2025**  
 **Middleware Administrator Assistant**
