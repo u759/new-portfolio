@@ -2,11 +2,16 @@
 **May 2026 – August 2026**  
 **Software Engineer Intern**
 
-- Rewrote backend NFC logic, and mobile app serving 500+ users for automated bicycle parking stations
-- Produced complete, production-ready code with FastAPI, React Native, Material UI
+- Rewrote production-ready FastAPI backend, NFC firmware, and React Native mobile app serving 500+ users for automated bicycle parking stations
+- Redesigned mobile app from the ground-up, focused on simplicity, intuitive design, accessible UI/UX, and secure authentication
 - Integrated IoT systems using MQTT and ESP32+RTC design, achieving ~100nA standby current
 - Thought really hard about security, designed secure NFC bicycle lock system with HMAC authentication and offline capability
 - Hired developers and interns and wrote technical and onboarding documentation
+
+|   |   |   |   |
+|---|---|---|---|
+| ![MAZDIS app login](/content/experience/professional/mazdis-01-login.jpg) | ![MAZDIS app station map](/content/experience/professional/mazdis-02-map.jpg) | ![MAZDIS app nearby parking](/content/experience/professional/mazdis-03-explore-park.jpg) | ![MAZDIS app nearby bike rentals](/content/experience/professional/mazdis-04-explore-rent.jpg) |
+| ![MAZDIS app active reservation](/content/experience/professional/mazdis-05-reservation.jpg) | ![MAZDIS app NFC unlock](/content/experience/professional/mazdis-06-nfc-unlock.jpg) | ![MAZDIS app active parking session](/content/experience/professional/mazdis-07-session.jpg) | ![MAZDIS app wallet](/content/experience/professional/mazdis-08-wallet.jpg) |
 
 ---
 
