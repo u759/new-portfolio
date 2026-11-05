@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/content';
 // @ts-ignore
 import './globals.css'; // Global styles
 
@@ -14,8 +15,15 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Ayden Nguyen',
-  description: 'A minimalist, modern portfolio website in the form of a file browser',
+  metadataBase: new URL('https://ayng.dev'),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

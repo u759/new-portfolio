@@ -3,10 +3,12 @@
 **Software Engineer Intern**
 
 - Rewrote production-ready FastAPI backend, NFC firmware, and React Native mobile app serving 500+ users for automated bicycle parking stations
-- Redesigned mobile app from the ground-up, focused on simplicity, intuitive design, accessible UI/UX, and secure authentication
 - Integrated IoT systems using MQTT and ESP32+RTC design, achieving ~100nA standby current
-- Thought really hard about security, designed secure NFC bicycle lock system with HMAC authentication and offline capability
-- Hired developers and interns and wrote technical and onboarding documentation
+- Built offline NFC unlock via RF-field wake from 100nA sleep, X25519/AES-256 encrypted, HMAC-verified commands with counter-based replay protection, and signed receipts synced to backend via phone
+- Built entire MVP from scratch, with NFC unlock, realtime SSE streaming for station state
+- Led strangler pattern migration for zero downtime, authored documentation and led technical interviews
+- Created admin dashboard to manage users, parking stations, and financials with RBAC-scoped administration
+- Diagnosed production PLC faults and software failsafes within 2h
 
 |   |   |   |   |
 |---|---|---|---|
@@ -17,17 +19,21 @@
 
 # BC Liquor Distribution Branch (BCLDB)  
 **May 2025 – December 2025**  
-**Middleware Administrator Assistant**
+**Middleware Systems Administrator**
 
 - Maintaining DEV and TEST infrastructure for the BCLDB, ensuring security patches on Red Hat Enterprise systems responsible for over $1B in annual revenue.  
-- Administering Java deployments via Oracle Service Bus, Wildfly, Service Oriented Architecture, and Glowroot, accelerating developer testing and integration with 99% uptime.
+- Administering Java deployments via Oracle Service Bus, Wildfly, Service Oriented Architecture, and Glowroot using load-balancing and JMS messaging, accelerating developer testing and integration with 99% uptime.
 - Automated monthly server patches using Ansible, reducing downtime from 1 hour to 15 minutes (75% reduction) across 20+ servers.
 - Ensuring access to PostgreSQL, Microsoft SQL, and Oracle SQL databases, supporting developer and retail operations.  
 - Monitoring and troubleshooting infrastructure, ensuring data integrity and reliability for the IT team.
+- Led datasource migration across 20+ Java WildFly servers; developed a Bash script to verify connectivity for 100+ sources, ensuring zero regressions
+- Diagnosed service outages using Glowroot and log analysis, identifying memory leaks and long-running SQL queries to restore service within 1 business day
 
 ---
 
-# University of British Columbia — Department of Computer Science  
+## Earlier experience
+
+### University of British Columbia — Department of Computer Science  
 **Sept – Dec 2024**  
 **Examination Invigilator**
 
@@ -37,7 +43,7 @@
 
 ---
 
-# Neighbourhood Pool
+### Neighbourhood Pool
 **June – August 2021**  
 **Pool Attendant**
 

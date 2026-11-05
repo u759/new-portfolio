@@ -2,63 +2,93 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, ChevronDown, Folder as FolderIcon, FileText, LoaderCircle, Menu, X } from 'lucide-react';
-import { getFileSystem, getFileContent, FileNode } from '@/app/actions';
+import { getFileContent, FileNode } from '@/app/actions';
+import {
+  DEFAULT_FILE_PATH,
+  SITE_NAME,
+  fileHref,
+  filePathFromHref,
+  findFile,
+  titleFromMarkdown,
+} from '@/lib/content';
+
+/** Plain left-clicks navigate in place; modified clicks (new tab, etc.) keep the browser default. */
+function isPlainLeftClick(event: React.MouseEvent<HTMLAnchorElement>) {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
 
 function FileExplorer({
   node,
   depth = 0,
-  onFileSelect,
+  onNavigate,
   selectedFile,
 }: {
   node: FileNode;
   depth?: number;
-  onFileSelect: (file: FileNode, content: string) => void;
+  onNavigate: (filePath: string) => void;
   selectedFile: FileNode | null;
 }) {
   const [isOpen, setIsOpen] = useState(true);
 
-  const toggleOpen = () => setIsOpen(!isOpen);
-
   const isFolder = node.type === 'folder';
   const isSelected = selectedFile?.path === node.path && !isFolder;
 
-  const handleClick = async () => {
-    if (isFolder) {
-      toggleOpen();
-    } else {
-      const content = await getFileContent(node.path);
-      onFileSelect(node, content);
-    }
-  };
+  const rowClassName = `flex items-center gap-2 py-1.5 cursor-pointer select-none text-[13px] transition-colors
+          ${isSelected ? 'bg-[#e8e8e8] text-[#000000] font-medium' : 'text-[#444444] hover:bg-[#efefef]'} ${isFolder ? 'font-semibold text-[#666666]' : ''}`;
+  const rowStyle = { paddingLeft: `${depth * 12 + 8}px` };
+
+  const rowContent = (
+    <>
+      <span className="text-[#a0a0a0] flex-shrink-0 w-4 flex justify-center opacity-60">
+        {isFolder ? (
+          isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />
+        ) : (
+          <span className="w-4 inline-block" />
+        )}
+      </span>
+      <span className="flex-shrink-0 opacity-60">
+        {isFolder ? (
+          <FolderIcon size={16} />
+        ) : (
+          <FileText size={16} />
+        )}
+      </span>
+      <span className="truncate">{node.name}</span>
+    </>
+  );
 
   return (
     <div>
-      <div
-        className={`flex items-center gap-2 py-1.5 cursor-pointer select-none text-[13px] transition-colors
-          ${isSelected ? 'bg-[#e8e8e8] text-[#000000] font-medium' : 'text-[#444444] hover:bg-[#efefef]'} ${isFolder ? 'font-semibold text-[#666666]' : ''}`}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-        onClick={handleClick}
-      >
-        <span className="text-[#a0a0a0] flex-shrink-0 w-4 flex justify-center opacity-60">
-          {isFolder ? (
-            isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />
-          ) : (
-            <span className="w-4 inline-block" />
-          )}
-        </span>
-        <span className="flex-shrink-0 opacity-60">
-          {isFolder ? (
-            <FolderIcon size={16} />
-          ) : (
-            <FileText size={16} />
-          )}
-        </span>
-        <span className="truncate">{node.name}</span>
-      </div>
+      {isFolder ? (
+        <div
+          className={rowClassName}
+          style={rowStyle}
+          role="button"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {rowContent}
+        </div>
+      ) : (
+        <a
+          href={fileHref(node.path)}
+          className={rowClassName}
+          style={rowStyle}
+          aria-current={isSelected ? 'page' : undefined}
+          onClick={(event) => {
+            if (!isPlainLeftClick(event)) return;
+            event.preventDefault();
+            onNavigate(node.path);
+          }}
+        >
+          {rowContent}
+        </a>
+      )}
 
       <AnimatePresence initial={false}>
         {isFolder && isOpen && node.children && (
@@ -74,7 +104,7 @@ function FileExplorer({
                 key={`${depth}-${index}`}
                 node={child}
                 depth={depth + 1}
-                onFileSelect={onFileSelect}
+                onNavigate={onNavigate}
                 selectedFile={selectedFile}
               />
             ))}
@@ -128,34 +158,63 @@ function MarkdownImage({
   );
 }
 
-export default function Home() {
-  const [fileSystem, setFileSystem] = useState<FileNode[]>([]);
-  const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
+export default function Portfolio({
+  fileSystem,
+  initialFile,
+}: {
+  fileSystem: FileNode[];
+  initialFile: FileNode | null;
+}) {
+  const searchParams = useSearchParams();
+  const requestedPath = searchParams.get('file') ?? DEFAULT_FILE_PATH;
+  const [selectedFile, setSelectedFile] = useState<FileNode | null>(initialFile);
+  const selectedPathRef = useRef<string | null>(initialFile?.path ?? null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isInitialLoadPending, setIsInitialLoadPending] = useState(true);
   const markdownContentRef = useRef<HTMLDivElement>(null);
+  const editorAreaRef = useRef<HTMLDivElement>(null);
   const imageDialogRef = useRef<HTMLDialogElement>(null);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [activeGalleryImageIndex, setActiveGalleryImageIndex] = useState<number | null>(null);
   const [isGalleryImageLoading, setIsGalleryImageLoading] = useState(false);
 
+  // The URL (?file=...) is the source of truth, so links, refreshes, and back/forward all agree.
   useEffect(() => {
-    const fetchRoot = async () => {
-      try {
-        const nodes = await getFileSystem();
-        setFileSystem(nodes);
+    if (requestedPath === selectedPathRef.current) {
+      return;
+    }
 
-        const initialFile = nodes.find(n => n.name === 'about.md' && n.type === 'file');
-        if (initialFile) {
-          const content = await getFileContent(initialFile.path);
-          setSelectedFile({ ...initialFile, content });
-        }
-      } finally {
-        setIsInitialLoadPending(false);
-      }
+    const node = findFile(fileSystem, requestedPath);
+    if (!node) {
+      return;
+    }
+
+    let isCancelled = false;
+    getFileContent(node.path).then((content) => {
+      if (isCancelled) return;
+      selectedPathRef.current = node.path;
+      setActiveGalleryImageIndex(null);
+      setGalleryImages([]);
+      setSelectedFile({ ...node, content });
+      editorAreaRef.current?.scrollTo({ top: 0 });
+    });
+
+    return () => {
+      isCancelled = true;
     };
-    fetchRoot();
-  }, []);
+  }, [requestedPath, fileSystem]);
+
+  useEffect(() => {
+    if (!selectedFile?.content) return;
+    const title = titleFromMarkdown(selectedFile.content);
+    document.title = selectedFile.path === DEFAULT_FILE_PATH || !title ? SITE_NAME : `${title} — ${SITE_NAME}`;
+  }, [selectedFile]);
+
+  const navigateTo = (filePath: string) => {
+    setIsSidebarOpen(false);
+    if (filePath !== requestedPath) {
+      window.history.pushState(null, '', fileHref(filePath));
+    }
+  };
 
   useEffect(() => {
     const dialog = imageDialogRef.current;
@@ -274,11 +333,7 @@ export default function Home() {
             <FileExplorer
               key={index}
               node={node}
-              onFileSelect={(file, content) => {
-                closeGallery();
-                setSelectedFile({ ...file, content });
-                setIsSidebarOpen(false); // Close sidebar on mobile after selection
-              }}
+              onNavigate={navigateTo}
               selectedFile={selectedFile}
             />
           ))}
@@ -290,10 +345,13 @@ export default function Home() {
         {/* Top Bar / Breadcrumb */}
         <div className="h-10 bg-[#f7f7f7] flex items-center shrink-0 border-b border-[#e5e5e5]">
           <button
-            className="md:hidden ml-2 mr-3 text-[#666666] hover:text-[#000000]"
+            type="button"
+            className="md:hidden ml-2 mr-3 flex items-center gap-1.5 text-xs font-mono text-[#666666] hover:text-[#000000]"
+            aria-label="Open file explorer"
             onClick={() => setIsSidebarOpen(true)}
           >
-            <Menu size={18} />
+            <Menu size={18} aria-hidden="true" />
+            <span>Files</span>
           </button>
           
           <div className="flex h-full">
@@ -313,23 +371,40 @@ export default function Home() {
         )}
 
         {/* Editor Area */}
-        <div className="flex-1 overflow-auto bg-[#ffffff] px-8 py-10 md:px-16" id="editor-area">
+        <div className="flex-1 overflow-auto bg-[#ffffff] px-8 py-10 md:px-16" id="editor-area" ref={editorAreaRef}>
           <div className="max-w-4xl">
-            {/* Directly conditionally render content without animations */}
-            {isInitialLoadPending ? (
-              <div className="h-full flex items-center justify-center text-[#888888] mt-32" role="status" aria-live="polite">
-                <div className="text-center font-mono text-sm">
-                  <div className="mb-4 flex justify-center">
-                    <LoaderCircle size={36} className="animate-spin text-[#0066cc]" aria-hidden="true" />
-                  </div>
-                  <div>Opening portfolio…</div>
-                </div>
-              </div>
-            ) : selectedFile && selectedFile.content ? (
+            {selectedFile && selectedFile.content ? (
               <div className="markdown-body" ref={markdownContentRef}>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
+                    a: ({ href, children }) => {
+                      const linkedPath = href ? filePathFromHref(href) : null;
+                      if (linkedPath) {
+                        return (
+                          <a
+                            href={fileHref(linkedPath)}
+                            onClick={(event) => {
+                              if (!isPlainLeftClick(event)) return;
+                              event.preventDefault();
+                              navigateTo(linkedPath);
+                            }}
+                          >
+                            {children}
+                          </a>
+                        );
+                      }
+                      const isExternal = href?.startsWith('http');
+                      return (
+                        <a
+                          href={href}
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                        >
+                          {children}
+                        </a>
+                      );
+                    },
                     img: ({ src, alt }) => (
                       <MarkdownImage
                         src={typeof src === 'string' ? src : ''}

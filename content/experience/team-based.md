@@ -1,13 +1,14 @@
 # UBC AeroDesign — University Engineering Design Team  
 **June 2025 – Present**  
-**Firmware Developer**
+**Software/Firmware Lead**
 
-- Developing flight control firmware for vertical takeoff/landing (VTOL) electric aircraft.
-- Implementing C++ code on an STM32H7 and custom power electronics for autonomous flight, takeoff/landing, and waypoint navigation with PID, GPS, IMU, Airspeed, and Barometer sensor fusion.
-- Architecting 4-layer cascaded PID controller for stable posistion hold in VTOL and waypoint navigation in forward flight
+- Leading 4 developers in the design of STM32H7 custom flight controller firmware for our Advanced aircraft, achieving 1st place flight performance against 20+ universities at SAE AeroDesign
+- Implementing C++ code on an STM32H7 and custom power electronics for autonomous flight, takeoff/landing, and waypoint navigation with PID, GPS, IMU, Airspeed, and Barometer EKF sensor fusion.
 - Optimized shared memory via thread-safe RTOS mailbox queue, for safe data sharing between FreeRTOS tasks
 - Refactored UART logging library from OS-blocking HAL writes to asynchronous DMA/ring-buffer logging, unblocking critical flight tasks and improving logging performance by 90%
-- Optimizing telemetry for ground-based monitoring.
+- Used FreeRTOS for PID control (position, velocity, attitude, rate) with 400-Hz interrupt service routine (ISR) to wake critical flight task with strict, deterministic timing, minimizing PID jitter
+- Employed Logic Analyzer to debug packets from DShot Speed Controller hardware, verifying firmware digital frame construction, mitigating timing overlaps and implementing bi-directional CRC checks
+- Led C to C++ migration, improving peripheral maintainability and RAII practices via default/delete constructors
 
 **Sept 2023 – June 2025**  
 **Power & Controls Lead**
@@ -19,7 +20,9 @@
 
 ---
 
-# Free Geek Vancouver  
+## Earlier experience
+
+### Free Geek Vancouver  
 **October 2021 – June 2022**  
 **Hardware Volunteer**
 
