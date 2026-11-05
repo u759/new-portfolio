@@ -2,11 +2,11 @@
 
 ## Highlights
 
-- **1st-place flight score against 20+ universities** at SAE AeroDesign 2026, flying the custom STM32H7 FreeRTOS flight-controller firmware I lead — [flight controller](/?file=projects/firmware/flight-controller.md) · [UBC AeroDesign](/?file=experience/team-based.md)
-- **500+ users** on the MAZDIS bicycle parking app and ESP32 NFC bike-lock firmware I architected — [MAZDIS](/?file=experience/professional.md)
+- **1st-place flight score against 20+ universities** at SAE AeroDesign 2026, with the custom STM32H7 FreeRTOS flight-controller firmware I lead — [flight controller](/?file=projects/firmware/flight-controller.md) · [UBC AeroDesign](/?file=experience/team-based.md)
+- **500+ users** on the MAZDIS bicycle parking app and ESP32 NFC bike-lock firmware I designed for MAZDIS — [MAZDIS](/?file=experience/professional.md)
 - **1,000+ challenges and 500+ benchmarked runs** on synthesize.sh, my AI-assisted coding platform — [synthesize.sh](/?file=projects/software/synthesize.md)
-- **Reverse-engineered a VW Simos 18.1 ECU** with an ESP32 CAN adapter and MCP tools for AI agents — [ECU Calibration Toolkit](/?file=projects/firmware/ecu-toolkit.md)
-- **75% less maintenance downtime** across 20+ Red Hat Linux servers by automating patches with Ansible — [BCLDB](/?file=experience/professional.md)
+- **Unlocked and modified a VW Simos 18.1 ECU** with an ESP32 CAN adapter, Python BIN decoder, and MCP tools for AI agents, increasing horsepower by **50%** — [ECU Calibration Toolkit](/?file=projects/firmware/ecu-toolkit.md)
+- **75% reduced enterprise maintenance downtime** across 20+ Red Hat Linux servers by automating patches with Ansible — [BCLDB](/?file=experience/professional.md)
 
 [Résumé (PDF)](/resume.pdf) · Browse everything else in the file explorer (tap **Files** on mobile).
 
