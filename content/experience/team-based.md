@@ -16,7 +16,7 @@
 - Engineering a high-performance electric aircraft to compete at SAE AeroDesign West; achieved the highest thrust-to-weight ratio in team history.  
 - Leading a team of 6 students to design a high-performance electric propulsion system.  
 - Spearheading the development of PCBs for propulsion testing and power distribution.  
-- Implemented C code for an embedded Arduino system to test propulsion performance.
+- Implemented C code for an embedded Arduino system to test propulsion performance ([GitHub](https://github.com/u759/UBC-AeroDesign-Thrust-Stand)).
 
 ---
 

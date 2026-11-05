@@ -6,7 +6,19 @@ import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, ChevronDown, Folder as FolderIcon, FileText, LoaderCircle, Menu, X } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Folder as FolderIcon,
+  FileText,
+  Globe,
+  LoaderCircle,
+  Mail,
+  Menu,
+  X,
+} from 'lucide-react';
+import { GithubIcon, LinkedinIcon } from '@/app/brand-icons';
 import { getFileContent, FileNode } from '@/app/actions';
 import {
   DEFAULT_FILE_PATH,
@@ -16,6 +28,19 @@ import {
   findFile,
   titleFromMarkdown,
 } from '@/lib/content';
+
+/** Picks an icon so a link's destination (GitHub, a live website, email) is clear at a glance. */
+type LinkIcon = React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
+
+function linkIconFor(href: string): LinkIcon | null {
+  if (href.startsWith('mailto:')) return Mail;
+  if (!href.startsWith('http')) return null;
+
+  const host = new URL(href).hostname.replace(/^www\./, '');
+  if (host === 'github.com') return GithubIcon;
+  if (host === 'linkedin.com') return LinkedinIcon;
+  return Globe;
+}
 
 /** Plain left-clicks navigate in place; modified clicks (new tab, etc.) keep the browser default. */
 function isPlainLeftClick(event: React.MouseEvent<HTMLAnchorElement>) {
@@ -395,12 +420,16 @@ export default function Portfolio({
                         );
                       }
                       const isExternal = href?.startsWith('http');
+                      const LinkIcon = href ? linkIconFor(href) : null;
                       return (
                         <a
                           href={href}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
                         >
+                          {LinkIcon && (
+                            <LinkIcon size={14} aria-hidden="true" className="mr-1 inline-block align-[-2px]" />
+                          )}
                           {children}
                         </a>
                       );
