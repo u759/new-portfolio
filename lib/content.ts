@@ -1,33 +1,33 @@
-import type { FileNode } from '@/app/actions';
+export type FileNode = {
+  name: string;
+  type: 'file' | 'folder';
+  path: string;
+  children?: FileNode[];
+};
 
 export const DEFAULT_FILE_PATH = 'about.md';
 export const SITE_NAME = 'Ayden Nguyen';
 export const SITE_DESCRIPTION =
   'Computer Engineering student at UBC building flight-controller firmware, embedded systems, and full-stack software.';
 
-export function findFile(nodes: FileNode[], filePath: string): FileNode | null {
-  for (const node of nodes) {
-    if (node.type === 'file' && node.path === filePath) {
-      return node;
-    }
-    if (node.type === 'folder' && node.children) {
-      const match = findFile(node.children, filePath);
-      if (match) {
-        return match;
-      }
-    }
-  }
-  return null;
-}
-
+/** content/experience/professional.md is served at /experience/professional; about.md is the home page. */
 export function fileHref(filePath: string): string {
-  return filePath === DEFAULT_FILE_PATH ? '/' : `/?file=${encodeURI(filePath)}`;
+  return filePath === DEFAULT_FILE_PATH ? '/' : `/${filePath.replace(/\.md$/, '')}`;
 }
 
-/** Returns the file path an in-site href points at, or null for any other link. */
-export function filePathFromHref(href: string): string | null {
-  const match = /^\/?\?file=(.+)$/.exec(href);
-  return match ? decodeURI(match[1]) : null;
+export function filePathFromSlug(slug: string[] | undefined): string {
+  return slug && slug.length > 0 ? `${slug.map(decodeURIComponent).join('/')}.md` : DEFAULT_FILE_PATH;
+}
+
+export function filePathFromPathname(pathname: string): string {
+  return filePathFromSlug(pathname.split('/').filter(Boolean));
+}
+
+/** True for links to other pages of this site (not assets like /resume.pdf, not other sites). */
+export function isInternalPageHref(href: string): boolean {
+  if (!href.startsWith('/') || href.startsWith('//')) return false;
+  const lastSegment = href.split(/[?#]/)[0].split('/').pop() ?? '';
+  return !lastSegment.includes('.');
 }
 
 export function titleFromMarkdown(content: string): string | null {

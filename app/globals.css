@@ -95,6 +95,58 @@
   padding: 0.5rem;
 }
 
+/*
+ * Justified gallery for image-only Markdown tables (ImageGrid in app/markdown.tsx), CSS only.
+ * Each item's flex-basis is (aspect ratio x target row height) and its flex-grow is its aspect
+ * ratio, so when a row's leftover width is shared out, every image in it keeps one height and
+ * the row exactly fills the width. Rows re-wrap on their own whenever the window is resized.
+ */
+.markdown-body .image-grid {
+  /* Lets 100cqw below mean "this gallery's width" rather than the viewport's. */
+  container-type: inline-size;
+  margin-bottom: 16px;
+}
+
+.markdown-body .image-grid-flow {
+  --gap: 8px;
+  /*
+   * Target row height: what fits the Markdown table's column count of average-shaped images per
+   * row, shrunk by 10% so rows of slightly wider images still fit and stretch to fill instead of
+   * wrapping. Never below --min-row-height, so narrow windows wrap to fewer images per row.
+   */
+  --row-height: max(
+    var(--min-row-height),
+    0.9 * (100cqw - (var(--columns) - 1) * var(--gap)) / (var(--columns) * var(--average-aspect-ratio))
+  );
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+/*
+ * Absorbs the last row's leftover space so a short final row keeps the target height (as in
+ * Google Photos). Must outweigh any row's combined item flex-grow (see below).
+ */
+.markdown-body .image-grid-flow::after {
+  content: '';
+  flex-grow: 1000000000;
+}
+
+.markdown-body .image-grid-item {
+  /*
+   * Scaled by 1000 because a line whose flex-grow values sum to less than 1 only hands out that
+   * fraction of its free space: a lone portrait (ratio < 1) on a row would otherwise not fill it.
+   */
+  flex-grow: calc(var(--aspect-ratio) * 1000);
+  flex-basis: calc(var(--aspect-ratio) * var(--row-height));
+  min-width: 0;
+}
+
+.markdown-body .image-grid img {
+  width: 100%;
+  max-height: none;
+}
+
 .markdown-body td img {
   width: 100%;
   height: auto;

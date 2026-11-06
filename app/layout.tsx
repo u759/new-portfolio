@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { PortfolioShell } from '@/app/portfolio-shell';
 import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/content';
+import { getFileSystem } from '@/lib/content-source';
 // @ts-ignore
 import './globals.css'; // Global styles
 
@@ -30,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="bg-[#ffffff] text-[#1a1a1a] font-sans antialiased overflow-hidden">
-        {children}
+        <PortfolioShell fileSystem={getFileSystem()}>{children}</PortfolioShell>
       </body>
     </html>
   );
