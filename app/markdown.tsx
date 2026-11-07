@@ -7,6 +7,7 @@ import { GithubIcon, LinkedinIcon } from '@/app/brand-icons';
 import { MarkdownImage } from '@/app/markdown-image';
 import { imageGridFromTable, type GridImage } from '@/lib/image-grid';
 import { isInternalPageHref } from '@/lib/content';
+import { mermaidSourceFromPre, renderMermaid } from '@/lib/mermaid';
 import rehypeImageSize from '@/lib/rehype-image-size';
 
 /** Max width of the Markdown column (Tailwind `max-w-4xl`). */
@@ -89,6 +90,21 @@ export function MarkdownDocument({ content }: { content: string }) {
               {LinkIcon && <LinkIcon size={14} aria-hidden="true" className="mr-1 inline-block align-[-2px]" />}
               {children}
             </a>
+          );
+        },
+        pre: ({ node, children }) => {
+          const mermaidSource = node ? mermaidSourceFromPre(node) : null;
+          if (mermaidSource === null) {
+            return <pre>{children}</pre>;
+          }
+          const diagram = renderMermaid(mermaidSource);
+          return (
+            <figure
+              className="mermaid-diagram"
+              style={{ '--diagram-width': `${diagram.width}px` } as CSSProperties}
+              // Trusted markup: generated at build time from this repo's own Markdown.
+              dangerouslySetInnerHTML={{ __html: diagram.svg }}
+            />
           );
         },
         table: ({ node, children }) => {

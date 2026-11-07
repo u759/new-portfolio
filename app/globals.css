@@ -200,6 +200,28 @@
   color: #333333;
 }
 
+/* Mermaid diagrams rendered to inline SVG at build time (lib/mermaid.ts). */
+.markdown-body .mermaid-diagram {
+  /* Also keeps --color-ide-bg in the built CSS; the diagrams' colours are derived from it. */
+  background-color: var(--color-ide-bg);
+  margin: 0 0 16px 0;
+  overflow-x: auto;
+}
+
+/*
+ * Fits the column: never enlarged past its natural width (--diagram-width, set from the SVG),
+ * and shrunk no further than 75% of it so labels stay readable; past that the diagram scrolls
+ * sideways inside its figure instead of widening the page.
+ */
+.markdown-body .mermaid-diagram svg {
+  display: block;
+  width: 100%;
+  max-width: var(--diagram-width);
+  min-width: calc(var(--diagram-width) * 0.75);
+  height: auto;
+  margin: 0 auto;
+}
+
 .markdown-body blockquote {
   padding: 0 1em;
   color: #666666;
